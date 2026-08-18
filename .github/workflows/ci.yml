@@ -130,7 +130,7 @@ jobs:
       - name: Stop storage service
         if: always()
         run: |
-          if [ -f /tmp/storage.pid ]; then
-            kill $(cat /tmp/storage.pid) 2>/dev/null || true
+         if [ -f /tmp/storage.pid ]; then
+         kill $(cat /tmp/storage.pid) 2>/dev/null || true
           fi
           test -f /tmp/storage.log && tail -n 200 /tmp/storage.log || true
