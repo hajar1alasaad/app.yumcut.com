@@ -131,6 +131,30 @@ jobs:
         if: always()
         run: |
           if [ -f /tmp/storage.pid ]; then
-            kill $(cat /tmp/storage.pid) 2>/dev/null || true
+            kill $(cat /tmp/storage.pid) 2>/dev/null || true 
           fi
-          test -f /tmp/storage.log && tail -n 200 /tmp/storage.log || true
+          test -f /tmp/storage.log && tail -n 200 /tmp/storage.log || true 
+          - name: Build Application
+            run: npm run build
+
+          - name: Create Release
+            if: startsWith(github.ref, 'refs/tags/')
+            uses: actions/create-release@v1
+            env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+            tag_name: ${{ github.ref }}
+            release_name: Release ${{ github.ref_name }}
+            draft: false
+            prerelease: false
+            id: create_release
+          - name: Upload App APK
+            if: startsWith(github.ref, 'refs/tags/')
+            uses: actions/upload-release-asset@v1
+            env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ./dist/app.apk
+            asset_name: app-${{ github.ref_name }}.apk
+            asset_content_type: application/octet-stream
